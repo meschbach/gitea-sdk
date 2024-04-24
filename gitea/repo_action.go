@@ -43,3 +43,35 @@ func (c *Client) DeleteRepoSecret(user, repo, secret string) (*Response, error) 
 	_, resp, err := c.getResponse("DELETE", fmt.Sprintf("/repos/%s/%s/actions/secrets/%s", user, repo, secret), nil, nil)
 	return resp, err
 }
+
+type CreateOrUpdateVariableOption struct {
+	Name string `json:"name,omitempty"`
+	Data string `json:"data"`
+}
+
+func (c *Client) CreateOrUpdateRepoVariable(owner, repo, variable string, opt CreateOrUpdateVariableOption) (*Response, error) {
+	if err := escapeValidatePathSegments(&owner, &repo); err != nil {
+		return nil, err
+	}
+	body, err := json.Marshal(opt)
+	if err != nil {
+		return nil, err
+	}
+	status, resp, err := c.getStatusCode("PUT", fmt.Sprintf("/repos/%s/%s/actions/variables/%s", owner, repo, variable), jsonHeader, bytes.NewReader(body))
+	if err != nil {
+		return resp, err
+	}
+	if status == http.StatusCreated || status == http.StatusNoContent {
+		return resp, nil
+	}
+	return resp, fmt.Errorf("unexpected Status: %d", status)
+}
+
+// DeleteRepoVariable delete a variable in a repository
+func (c *Client) DeleteRepoVariable(owner, repo, variable string) (*Response, error) {
+	if err := escapeValidatePathSegments(&owner, &repo); err != nil {
+		return nil, err
+	}
+	_, resp, err := c.getResponse("DELETE", fmt.Sprintf("/repos/%s/%s/actions/variables/%s", owner, repo, variable), nil, nil)
+	return resp, err
+}
