@@ -49,7 +49,7 @@ type CreateOrUpdateVariableOption struct {
 	Data string `json:"data"`
 }
 
-func (c *Client) CreateOrUpdateRepoVariable(owner, repo, variable string, opt CreateOrUpdateVariableOption) (*Response, error) {
+func (c *Client) CreateRepoVariable(owner, repo, variable string, opt CreateOrUpdateVariableOption) (*Response, error) {
 	if err := escapeValidatePathSegments(&owner, &repo); err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (c *Client) CreateOrUpdateRepoVariable(owner, repo, variable string, opt Cr
 	if err != nil {
 		return nil, err
 	}
-	status, resp, err := c.getStatusCode("PUT", fmt.Sprintf("/repos/%s/%s/actions/variables/%s", owner, repo, variable), jsonHeader, bytes.NewReader(body))
+	status, resp, err := c.getStatusCode("POST", fmt.Sprintf("/repos/%s/%s/actions/variables/%s", owner, repo, variable), jsonHeader, bytes.NewReader(body))
 	if err != nil {
 		return resp, err
 	}
